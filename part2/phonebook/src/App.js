@@ -1,12 +1,15 @@
-import { useState } from "react";
-import Person from "./component/Person";
+import { useEffect, useState } from "react";
+import Item from "./component/Item";
+import personService from "./service/person";
 
-const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040 - 123456", id: 1 },
-  ]);
+const App = (props) => {
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [number, setNumber] = useState("");
+
+  useEffect(() => {
+    personService.getAll().then((initialPerson) => setPersons(initialPerson));
+  }, [persons]);
 
   const addNew = (e) => {
     const person = persons.find((person) => person.name === newName);
@@ -30,6 +33,13 @@ const App = () => {
   const handleNumber = (e) => {
     setNumber(e.target.value);
   };
+
+  const deletePerson = (person) => {
+    personService
+      .deletePerson(person.id)
+      .then((persons) => setPersons(persons));
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -45,7 +55,14 @@ const App = () => {
         </div>
       </form>
       <h2>Numbers</h2>
-      <Person persons={persons} />
+      {/* <Person persons={persons} deleteHandler={() => deleteHandler()} /> */}
+      {persons.map((person) => (
+        <Item
+          key={person.id}
+          item={person}
+          deleteHandler={() => deletePerson(person)}
+        />
+      ))}
     </div>
   );
 };
